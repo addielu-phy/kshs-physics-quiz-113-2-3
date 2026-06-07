@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /results/{id} {
+      allow create: if isValidResult(request.resource.data);
+      allow read: if request.auth != null
+        && request.auth.token.email == "quantumlu0801@gmail.com";
+      allow update, delete: if false;
+
+      function isValidResult(d) {
+        return d.name is string
+          && d.name.size() > 0
+          && d.name.size() <= 40
+          && d.mode is string
+          && d.score is int
+          && d.score >= 0
+          && d.score <= 200
+          && d.maxScore is int
+          && d.maxScore > 0
+          && d.maxScore <= 200
+          && d.correct is int
+          && d.correct >= 0
+          && d.total is int
+          && d.total > 0
+          && d.total <= 100
+          && d.ids is list
+          && d.ids.size() > 0
+          && d.ids.size() <= 100
+          && d.wrongIds is list
+          && d.wrongIds.size() <= 100
+          && d.durationSec is int
+          && d.durationSec >= 0
+          && d.ts == request.time;
+      }
+    }
+  }
+}

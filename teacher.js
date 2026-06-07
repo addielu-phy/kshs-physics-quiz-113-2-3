@@ -47,6 +47,10 @@ function renderLogin(msg) {
     <div class="brand"><div class="logo">師</div><div><h1>老師後台登入</h1><div class="sub">全班成績總覽</div></div></div>
     <div class="card">
       ${msg ? `<p class="chip bad">${msg}</p>` : ""}
+      <button class="btn primary block" onclick="doGoogleLogin()">使用 Google 帳號登入</button>
+      <p class="muted small" style="margin-top:10px">請使用 <b>${CLOUD.teacherEmail || "授權的老師帳號"}</b> 登入。學生端不需要登入。</p>
+      <hr class="sep">
+      <p class="muted small">若你之後在 Firebase 另外建立 Email/Password 老師帳號，也可以用下方方式登入。</p>
       <label class="lbl">老師 Email</label>
       <input type="text" id="em" placeholder="teacher@example.com" autocomplete="username">
       <div style="height:10px"></div>
@@ -54,10 +58,15 @@ function renderLogin(msg) {
       <input type="text" id="pw" placeholder="••••••••" style="-webkit-text-security:disc" autocomplete="current-password"
         onkeydown="if(event.key==='Enter')doLogin()">
       <div style="height:14px"></div>
-      <button class="btn primary block" onclick="doLogin()">登入</button>
-      <p class="muted small" style="margin-top:10px">帳號由你在 Firebase 控制台建立（Authentication → Users）。學生端不需要登入。</p>
+      <button class="btn block" onclick="doLogin()">Email 登入</button>
     </div>`;
 }
+window.doGoogleLogin = function () {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  firebase.auth().signInWithPopup(provider)
+    .catch(e => renderLogin("Google 登入失敗：" + (e.code || e.message)));
+};
 window.doLogin = function () {
   const em = document.getElementById("em").value.trim();
   const pw = document.getElementById("pw").value;
